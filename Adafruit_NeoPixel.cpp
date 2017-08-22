@@ -1,4 +1,4 @@
-#include <SDL.H>
+#include <SDL.h>
 #include <SDL2_gfxPrimitives.h>
 #include "Adafruit_NeoPixel.h"
 
@@ -58,8 +58,8 @@ void Adafruit_NeoPixel::show() {
 
 Adafruit_NeoPixel::Adafruit_NeoPixel() {
 
-    const int SCREEN_WIDTH = 640;
-    const int SCREEN_HEIGHT = 480;
+    const int SCREEN_WIDTH = 1024;
+    const int SCREEN_HEIGHT = 768;
 
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0) {
         SDL_Log("Unable to initialize SDL: %s", SDL_GetError());
@@ -67,7 +67,7 @@ Adafruit_NeoPixel::Adafruit_NeoPixel() {
     }
 
     SDL_Window *win = SDL_CreateWindow("Burning Man 2017!", 100, 100, SCREEN_WIDTH, SCREEN_HEIGHT,
-                                       SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+                                       SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE );
     if (win == NULL) {
         SDL_Log("SDL_CreateWindow Error: %s", SDL_GetError());
         SDL_Quit();

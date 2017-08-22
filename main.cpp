@@ -1,5 +1,5 @@
 #include <iostream>
-#include <SDL.H>
+#include <SDL.h>
 #include "Adafruit_NeoPixel.h"
 #include "LedAssignments.h"
 
@@ -13,7 +13,7 @@ void delay(uint8_t wait) {
 void colorWipeUp(uint32_t color, uint8_t wait) {
     for (uint16_t i = 0; i < GetMaxColHeight(); i++) {
         for(uint16_t pixel_idx = 0; pixel_idx < strip.numPixels(); pixel_idx++) {
-            uint8_t row_idx, col_idx;
+             uint8_t row_idx, col_idx;
             GetRowAndColIdx(pixel_idx, &row_idx, &col_idx);
             if (row_idx == i) {
                 strip.setPixelColor(pixel_idx, color);
