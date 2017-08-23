@@ -10,7 +10,7 @@ void delay(uint16_t wait) {
 }
 
 inline int random(int max) {
-    random() % max;
+    return random() % max;
 }
 
 inline unsigned long millis() {
