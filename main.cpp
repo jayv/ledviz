@@ -5,7 +5,7 @@
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel();
 
-void delay(uint8_t wait) {
+void delay(uint16_t wait) {
     strip.delay(wait);
 }
 
@@ -43,19 +43,40 @@ void circleLineChase(uint32_t color_background, uint32_t color_line, uint32_t li
     }
 }
 
+
+
 void loop() {
+
     colorWipeUp(strip.Color(25, 0, 0), 50); // Red
     colorWipeUp(strip.Color(0, 25, 0), 50); // Green
     colorWipeUp(strip.Color(0, 0, 25), 50); // Blue
     circleLineChase(strip.Color(0, 0, 0), strip.Color(250, 0, 0), 2, 40);
     circleLineChase(strip.Color(0, 0, 0), strip.Color(0, 250, 0), 2, 40);
     circleLineChase(strip.Color(0, 0, 0), strip.Color(0, 0, 250), 2, 40);
+
 }
+
+
+int x = 0;
+void loopLedsInSequence() {
+
+    for (int i = 0; i < strip.numPixels(); i++) {
+        strip.setPixelColor(i, strip.Color(255, 255, 255));
+    }
+
+    strip.setPixelColor(x, strip.Color(0,140,255));
+
+    strip.show();
+    delay(100);
+    x = x < 105 ? x + 1 : x = 0;
+}
+
 
 int main() {
 
     while (!strip.done) {
         loop();
+//        loopLedsInSequence();
     }
     SDL_Quit();
     return 0;

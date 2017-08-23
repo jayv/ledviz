@@ -11,9 +11,9 @@ public:
     void setPixelColor(uint16_t i, uint32_t color);
     void show();
     SDL_bool done = SDL_FALSE;
-    void delay(uint8_t);
+    void delay(uint16_t);
 private:
-    uint32_t leds[110];
+    uint32_t leds[106];
     SDL_Renderer *ren;
     SDL_Event event;
 };

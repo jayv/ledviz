@@ -1,12 +1,16 @@
 #include <SDL.h>
 #include <SDL2_gfxPrimitives.h>
 #include "Adafruit_NeoPixel.h"
-
+#include <iostream>
 uint16_t Adafruit_NeoPixel::numPixels() {
-    return 110;
+    return 106;
 }
 
 void Adafruit_NeoPixel::setPixelColor(uint16_t i, uint32_t color) {
+    if (i < 0 || i > numPixels() -1) {
+        std::cout << "pixel out of bounds " << std::to_string(i) << std::endl;
+        return; // ignore out of bounds
+    }
     leds[i] = color;
 }
 
@@ -27,12 +31,12 @@ void Adafruit_NeoPixel::show() {
     SDL_SetRenderDrawColor(ren, 0, 0, 0, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(ren);
 
-    for (uint8_t x = 0; x < 28; x++) {
+    for (uint8_t x = 0; x < 27; x++) { // Draw top to bottom
 
-        uint8_t al = 84 + x-2; // arrow left segment
-        uint8_t ar = 83 - x-1; // arrow right segment
-        uint8_t cl = 28 + x; // cross left segment
-        uint8_t cr = 27 - x; // cross right segment
+        uint8_t al = 81 + x-2; // arrow left segment
+        uint8_t ar = 80 - x; // arrow right segment
+        uint8_t cl = 27 + x; // cross left segment
+        uint8_t cr = 26 - x; // cross right segment
 
         if (x != 0)  {
             thickLineRGBA(ren, 300, 100 + x * 20, 400, 100 + x * 20, 3, r(leds[al]), g(leds[al]), b(leds[al]), SDL_ALPHA_OPAQUE);
@@ -67,7 +71,7 @@ Adafruit_NeoPixel::Adafruit_NeoPixel() {
     }
 
     SDL_Window *win = SDL_CreateWindow("Burning Man 2017!", 100, 100, SCREEN_WIDTH, SCREEN_HEIGHT,
-                                       SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE );
+                                       SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE /* | SDL_WINDOW_ALLOW_HIGHDPI */ );
     if (win == NULL) {
         SDL_Log("SDL_CreateWindow Error: %s", SDL_GetError());
         SDL_Quit();
@@ -88,7 +92,7 @@ uint32_t Adafruit_NeoPixel::Color(uint8_t r, uint8_t g, uint8_t b) {
     return (((r & 0xff) << 24) + ((g & 0xff) << 16) + ((b & 0xff) << 8) + SDL_ALPHA_OPAQUE);
 }
 
-void Adafruit_NeoPixel::delay(uint8_t wait) {
-    if (!done) SDL_Delay(wait/2);
+void Adafruit_NeoPixel::delay(uint16_t wait) {
+    if (!done) SDL_Delay(wait);
 }
 
