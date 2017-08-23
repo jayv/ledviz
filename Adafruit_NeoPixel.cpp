@@ -2,6 +2,8 @@
 #include <SDL2_gfxPrimitives.h>
 #include "Adafruit_NeoPixel.h"
 #include <iostream>
+#include <opencl-c.h>
+
 uint16_t Adafruit_NeoPixel::numPixels() {
     return 106;
 }
@@ -22,6 +24,10 @@ uint8_t g(uint32_t color) {
 }
 uint8_t b(uint32_t color) {
     return (color >> 8) & 0xff;
+}
+
+inline double radians(double degrees) {
+    return (M_PI / 180) *;
 }
 
 void Adafruit_NeoPixel::show() {
@@ -46,7 +52,24 @@ void Adafruit_NeoPixel::show() {
         thickLineRGBA(ren, 700, 100 + x * 20, 800, 100 + x * 20, 3, r(leds[cl]), g(leds[cl]), b(leds[cl]), SDL_ALPHA_OPAQUE);
         thickLineRGBA(ren, 800, 100 + x * 20, 900, 100 + x * 20, 3, r(leds[cr]), g(leds[cr]), b(leds[cr]), SDL_ALPHA_OPAQUE);
 
+
+
+        int angle = 360/27;
+        int radius = 200;
+
+        CX = 512;
+        CY = 384
+
+        float x = cos(radians(angle)) * radius; //convert angle to radians for x and y coordinates
+        float y = sin(radians(angle)) * radius;
+        line(x+400, y+400, 0+400, 0+400); //draw a line from each point back to the centre
+        thickLineRGBA(ren, , 3, 150, 100, 0, SDL_ALPHA_OPAQUE);
+
+
+
     }
+
+
 
     SDL_RenderPresent(ren);
 
