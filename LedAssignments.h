@@ -2,6 +2,7 @@
 #define BURNINGMAN_LEDASSIGNMENTS_H
 
 #include <cstdint>
+typedef uint8_t byte;
 
 const uint8_t COL_HEIGHTS[] = {27, 27, 26, 26};
 const bool COL_DIR[] = {true, false, true, false}; // true = up, false = down

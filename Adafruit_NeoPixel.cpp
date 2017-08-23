@@ -15,13 +15,13 @@ void Adafruit_NeoPixel::setPixelColor(uint16_t i, uint32_t color) {
 }
 
 uint8_t r(uint32_t color) {
-    return (color >> 24) & 0xff;
-}
-uint8_t g(uint32_t color) {
     return (color >> 16) & 0xff;
 }
-uint8_t b(uint32_t color) {
+uint8_t g(uint32_t color) {
     return (color >> 8) & 0xff;
+}
+uint8_t b(uint32_t color) {
+    return (color >> 0) & 0xff;
 }
 
 void Adafruit_NeoPixel::show() {
@@ -88,8 +88,16 @@ Adafruit_NeoPixel::Adafruit_NeoPixel() {
 
 }
 
+// Convert separate R,G,B into packed 32-bit RGB color.
+// Packed format is always RGB, regardless of LED strand color order.
 uint32_t Adafruit_NeoPixel::Color(uint8_t r, uint8_t g, uint8_t b) {
-    return (((r & 0xff) << 24) + ((g & 0xff) << 16) + ((b & 0xff) << 8) + SDL_ALPHA_OPAQUE);
+    return ((uint32_t)r << 16) | ((uint32_t)g <<  8) | b;
+}
+
+// Convert separate R,G,B,W into packed 32-bit WRGB color.
+// Packed format is always WRGB, regardless of LED strand color order.
+uint32_t Adafruit_NeoPixel::Color(uint8_t r, uint8_t g, uint8_t b, uint8_t w) {
+    return ((uint32_t)w << 24) | ((uint32_t)r << 16) | ((uint32_t)g <<  8) | b;
 }
 
 void Adafruit_NeoPixel::delay(uint16_t wait) {
