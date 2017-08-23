@@ -2,7 +2,6 @@
 #include <SDL2_gfxPrimitives.h>
 #include "Adafruit_NeoPixel.h"
 #include <iostream>
-#include <opencl-c.h>
 
 uint16_t Adafruit_NeoPixel::numPixels() {
     return 106;
@@ -27,7 +26,7 @@ uint8_t b(uint32_t color) {
 }
 
 inline double radians(double degrees) {
-    return (M_PI / 180) *;
+    return (M_PI / 180) * degrees;
 }
 
 void Adafruit_NeoPixel::show() {
@@ -53,23 +52,28 @@ void Adafruit_NeoPixel::show() {
         thickLineRGBA(ren, 800, 100 + x * 20, 900, 100 + x * 20, 3, r(leds[cr]), g(leds[cr]), b(leds[cr]), SDL_ALPHA_OPAQUE);
 
 
-
-        int angle = 360/27;
-        int radius = 200;
-
-        CX = 512;
-        CY = 384
-
-        float x = cos(radians(angle)) * radius; //convert angle to radians for x and y coordinates
-        float y = sin(radians(angle)) * radius;
-        line(x+400, y+400, 0+400, 0+400); //draw a line from each point back to the centre
-        thickLineRGBA(ren, , 3, 150, 100, 0, SDL_ALPHA_OPAQUE);
-
-
-
     }
 
+    // Experiment with angled lines, TBC
 
+    double radius = 300;
+
+    int CX = 512;
+    int CY = 384;
+
+    double segments = 47;
+    double angle = 360/segments;
+
+    for (int x=0; x <= segments; x++) {
+
+        double cx = cos(radians(angle * x)) * radius; //convert angle to radians for x and y coordinates
+        double cy = sin(radians(angle * x)) * radius;
+        double cx2 = cos(radians(angle * x)) * (2*radius); //convert angle to radians for x and y coordinates
+        double cy2 = sin(radians(angle * x)) * (2*radius);
+
+        thickLineRGBA(ren, cx+CX, cy+CY, CX+cx2, CY+cy2, 3, 140, 150, 50, SDL_ALPHA_OPAQUE);
+
+    }
 
     SDL_RenderPresent(ren);
 
