@@ -346,10 +346,6 @@ void rodsWipeUp() {
     }
 }
 
-void flood() {
-
-}
-
 void pulseBeam() {
 
     Segment segments;
@@ -377,35 +373,38 @@ void pulseBeam() {
             progress = (elapsed % 3000) / 3000.0;
 
             double rows = amagnitude * horizon;
+            double cutoffHead = horizon - rows;
+            double cutoffTail = horizon + rows;
 
-//            std::cout << "x = " << std::to_string(x) << " rows = " << std::to_string(rows) << std::endl;
+            uint32_t color = strip.Color(0,0,0);
+            uint32_t baseColor = Wheel(255 * progress);//Wheel(255 * progress);
 
-            uint32_t color = Wheel(255 * progress);
+            for (int y = 0; y < 27; y++) {
 
-            for (int y = 0; y < 26; y++) {
+                if (rows != 0 && y > cutoffHead && y < cutoffTail) {
+                    double distScale = 1.0 - (abs(horizon-y)/rows);
+                    color = ColorScale(baseColor, distScale);
+//                    std::cout << "row = " << std::to_string(y) << " rows = "
+//                              << std::to_string(rows) << " scale = "
+//                              << std::to_string(distScale) << std::endl;
+                }
 
-                double distscale = rows == 0 ? 0 : ((y % horizon)-(horizon-rows))/rows;
-
-                std::cout << "row = " << std::to_string(y) << " rows = " << std::to_string(rows) << " scale = " << std::to_string(distscale) << std::endl;
-
-                color = ColorScale(color, distscale);
-    
                 GetIdxForRow(y, segments);
-                strip.setPixelColor(segments.al, color);
-                strip.setPixelColor(segments.ar, color);
+                if (y != 26) {
+                    strip.setPixelColor(segments.al, color);
+                    strip.setPixelColor(segments.ar, color);
+                }
                 strip.setPixelColor(segments.cl, color);
                 strip.setPixelColor(segments.cr, color);
     
             }
     
             strip.show();
-            delay(100);
+            delay(20);
     
         }
         
     }
-    
-
 
 }
 
