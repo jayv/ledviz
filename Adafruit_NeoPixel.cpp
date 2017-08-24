@@ -2,7 +2,7 @@
 #include <SDL2_gfxPrimitives.h>
 #include "Adafruit_NeoPixel.h"
 #include <iostream>
-uint16_t Adafruit_NeoPixel::numPixels() {
+uint16_t Adafruit_NeoPixel::numPixels() const {
     return 106;
 }
 
@@ -102,5 +102,13 @@ uint32_t Adafruit_NeoPixel::Color(uint8_t r, uint8_t g, uint8_t b, uint8_t w) {
 
 void Adafruit_NeoPixel::delay(uint16_t wait) {
     if (!done) SDL_Delay(wait);
+}
+
+uint32_t Adafruit_NeoPixel::getPixelColor(uint16_t i) const {
+    if (i < 0 || i > numPixels() -1) {
+        std::cout << "pixel out of bounds " << std::to_string(i) << std::endl;
+        return 0; // ignore out of bounds
+    }
+    return leds[i];
 }
 

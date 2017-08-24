@@ -9,14 +9,22 @@ void delay(uint16_t wait) {
     strip.delay(wait);
 }
 
+// Simulating Arduino APIs /////////////////////////////
+
 inline int random(int max) {
-    random() % max;
+    return random() % max;
 }
 
 inline unsigned long millis() {
     using namespace std::chrono;
     return duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 }
+
+inline double abs(double val) {
+    return fabs(val);
+}
+
+// ////////////////////////////////////////////////////
 
 int t_gamma[] = {
         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
@@ -96,6 +104,9 @@ uint8_t blue(uint32_t c) {
     return (c);
 }
 
+uint32_t ColorScale(uint32_t color, float scale) {
+    return strip.Color(((color >> 16) & 0xff) * scale, ((color >> 8) & 0xff) * scale, (color & 0xff) * scale);
+}
 
 void rainbowFade2White(uint8_t wait, int rainbowLoops, int whiteLoops) {
     float fadeMax = 100.0;
@@ -314,6 +325,91 @@ void theaterChaseRainbow(uint8_t wait) {
     }
 }
 
+void rodsWipeUp() {
+
+    Segment segments;
+
+    for (int x=0; x <=26; x++) {
+
+        for (int y=0; y < strip.numPixels(); y++) {
+            strip.setPixelColor(y, strip.Color(150,150,150));
+        }
+
+        GetIdxForRow(x, segments);
+        strip.setPixelColor(segments.al, strip.Color(0,100,200));
+        strip.setPixelColor(segments.ar, strip.Color(0,100,200));
+        strip.setPixelColor(segments.cl, strip.Color(0,100,200));
+        strip.setPixelColor(segments.cr, strip.Color(0,100,200));
+        strip.show();
+
+        delay(100);
+    }
+}
+
+void flood() {
+
+}
+
+void pulseBeam() {
+
+    Segment segments;
+
+    int horizon = 13;
+
+    // clear rods
+    for (int y=0; y < strip.numPixels(); y++) {
+        strip.setPixelColor(y, strip.Color(0,0,0));
+    }
+
+    unsigned long start = millis();
+    double progress;
+    bool done = false;
+    while(!done) {
+
+        for (int x = 0; x < 100; x++) {
+    
+            double magnitude = sin(pow(x/10.0,2));
+            double amagnitude = abs(magnitude);
+    
+            unsigned long now = millis();
+            unsigned long elapsed = now - start;
+            if (elapsed > 10000) done = true;
+            progress = (elapsed % 3000) / 3000.0;
+
+            double rows = amagnitude * horizon;
+
+//            std::cout << "x = " << std::to_string(x) << " rows = " << std::to_string(rows) << std::endl;
+
+            uint32_t color = Wheel(255 * progress);
+
+            for (int y = 0; y < 26; y++) {
+
+                double distscale = rows == 0 ? 0 : ((y % horizon)-(horizon-rows))/rows;
+
+                std::cout << "row = " << std::to_string(y) << " rows = " << std::to_string(rows) << " scale = " << std::to_string(distscale) << std::endl;
+
+                color = ColorScale(color, distscale);
+    
+                GetIdxForRow(y, segments);
+                strip.setPixelColor(segments.al, color);
+                strip.setPixelColor(segments.ar, color);
+                strip.setPixelColor(segments.cl, color);
+                strip.setPixelColor(segments.cr, color);
+    
+            }
+    
+            strip.show();
+            delay(100);
+    
+        }
+        
+    }
+    
+
+
+}
+
+
 
 void loop() {
 
@@ -334,31 +430,17 @@ void loop() {
 
 //    rainbowCycle(20);
 
-    rainbow(20);
+//    rainbow(20);
 
+//    rodsWipeUp();
+
+    pulseBeam();
 }
-
-
-int x = 0;
-void loopLedsInSequence() {
-
-    for (int i = 0; i < strip.numPixels(); i++) {
-        strip.setPixelColor(i, strip.Color(255, 255, 255));
-    }
-
-    strip.setPixelColor(x, strip.Color(0,140,255));
-
-    strip.show();
-    delay(100);
-    x = x < strip.numPixels() - 1 ? x + 1 : x = 0;
-}
-
 
 int main() {
 
     while (!strip.done) {
         loop();
-//        loopLedsInSequence();
     }
     SDL_Quit();
     return 0;
