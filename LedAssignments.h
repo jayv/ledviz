@@ -90,4 +90,35 @@ uint8_t GetFullCircleTotal() {
     return COL_HEIGHTS[0] + COL_HEIGHTS[2] + 2 * CIRCLE_DEADZONE;
 }
 
+byte getRed(uint32_t color) {
+    return (color >> 16) & 0xff;
+}
+
+byte getGreen(uint32_t color) {
+    return (color >> 8) & 0xff;
+}
+
+byte getBlue(uint32_t color) {
+    return (color) & 0xff;
+}
+
+// Interpolate between color1 and color2. from value == 0: color1, to value == 255: color2
+uint32_t interpolate(uint32_t color1, uint32_t color2, byte value) {
+    byte r1 = getRed(color1);
+    byte g1 = getGreen(color1);
+    byte b1 = getBlue(color1);
+
+    byte r2 = getRed(color2);
+    byte g2 = getGreen(color2);
+    byte b2 = getBlue(color2);
+
+    byte r = (double)r1 + double(r2 - r1) * value / 255;
+    byte g = (double)g1 + double(g2 - g1) * value / 255;
+    byte b = (double)b1 + double(b2 - b1) * value / 255;
+
+    uint32_t color_out = (uint32_t)r << 16 | (uint32_t)g << 8 | (uint32_t)b;
+
+    return color_out;
+}
+
 #endif //BURNINGMAN_LEDASSIGNMENTS_H
