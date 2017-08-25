@@ -285,6 +285,12 @@ void theaterChaseRainbow(uint8_t wait) {
     }
 }
 
+// acceleration until halfway, then deceleration
+// https://gist.github.com/gre/1650294
+float easeInOutQuad(float t) {
+    return t<.5 ? 2.0*t*t : -1+(4-2.0*t)*t;
+}
+
 void kitt() {
 
     Segment segments;
@@ -301,10 +307,12 @@ void kitt() {
         unsigned long now = millis();
         unsigned long elapsed = now - start;
         if (elapsed > 15000) done = true;
-        double progress = ((elapsed % 1700) / 1700.0);
-        
+        double progress = ((elapsed % 2700) / 2700.0);
+        progress = easeInOutQuad(progress);
+
         int lead = progress * (26 * 2); 
-        
+        const int tail = 7;
+
         for (int x=0; x <26; x++) {
 
             uint32_t color = strip.Color(0, 0, 0);
@@ -313,11 +321,11 @@ void kitt() {
 
             int dist = abs(leadToX - x);
 
-            if ((dist <= 5) && ((progress < 0.5 && x <= leadToX) || (progress >= 0.5 && x > leadToX))) {
-                double distScale = 1.0 - (2 * dist / 10.0);
+            if ((dist <= 7) && ((progress < 0.5 && x <= leadToX) || (progress >= 0.5 && x > leadToX))) {
+                double distScale = 1.0 - ((2.0*dist) / (2.0*tail));
                 color = ColorScale(strip.Color(255, 0, 0), distScale);
             }
-            
+
             GetIdxForRow(x, segments);
             strip.setPixelColor(segments.al, color);
             strip.setPixelColor(segments.ar, color);
@@ -326,7 +334,7 @@ void kitt() {
         }
         strip.show();
 
-        delay(30);
+        delay(10);
     }
     
 }
@@ -357,7 +365,7 @@ void conveyorbelt() {
         }
 
         strip.show();
-        delay(50);
+        delay(40);
 
     }
 
