@@ -9,6 +9,8 @@ void delay(uint16_t wait) {
     strip.delay(wait);
 }
 
+// Simulating Arduino APIs /////////////////////////////
+
 inline int random(int max) {
     return random() % max;
 }
@@ -18,23 +20,11 @@ inline unsigned long millis() {
     return duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 }
 
-int t_gamma[] = {
-        0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-        0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,  1,  1,  1,
-        1,  1,  1,  1,  1,  1,  1,  1,  1,  2,  2,  2,  2,  2,  2,  2,
-        2,  3,  3,  3,  3,  3,  3,  3,  4,  4,  4,  4,  4,  5,  5,  5,
-        5,  6,  6,  6,  6,  7,  7,  7,  7,  8,  8,  8,  9,  9,  9, 10,
-        10, 10, 11, 11, 11, 12, 12, 13, 13, 13, 14, 14, 15, 15, 16, 16,
-        17, 17, 18, 18, 19, 19, 20, 20, 21, 21, 22, 22, 23, 24, 24, 25,
-        25, 26, 27, 27, 28, 29, 29, 30, 31, 32, 32, 33, 34, 35, 35, 36,
-        37, 38, 39, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 50,
-        51, 52, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 66, 67, 68,
-        69, 70, 72, 73, 74, 75, 77, 78, 79, 81, 82, 83, 85, 86, 87, 89,
-        90, 92, 93, 95, 96, 98, 99,101,102,104,105,107,109,110,112,114,
-        115,117,119,120,122,124,126,127,129,131,133,135,137,138,140,142,
-        144,146,148,150,152,154,156,158,160,162,164,167,169,171,173,175,
-        177,180,182,184,186,189,191,193,196,198,200,203,205,208,210,213,
-        215,218,220,223,225,228,231,233,236,239,241,244,247,249,252,255 };
+inline double abs(double val) {
+    return fabs(val);
+}
+
+// ////////////////////////////////////////////////////
 
 // Input a value 0 to 255 to get a color value.
 // The colours are a transition r - g - b - back to r.
@@ -96,6 +86,9 @@ uint8_t blue(uint32_t c) {
     return (c);
 }
 
+uint32_t ColorScale(uint32_t color, float scale) {
+    return strip.Color(((color >> 16) & 0xff) * scale, ((color >> 8) & 0xff) * scale, (color & 0xff) * scale);
+}
 
 void rainbowFade2White(uint8_t wait, int rainbowLoops, int whiteLoops) {
     float fadeMax = 100.0;
@@ -139,28 +132,6 @@ void rainbowFade2White(uint8_t wait, int rainbowLoops, int whiteLoops) {
 
 //    delay(500);
 
-
-//    for(int k = 0 ; k < whiteLoops ; k ++){
-//
-//        for(int j = 0; j < 256 ; j++){
-//
-//            for(uint16_t i=0; i < strip.numPixels(); i++) {
-//                strip.setPixelColor(i, strip.Color(0,0,0, t_gamma[j] ) );
-//            }
-//            strip.show();
-//        }
-//
-//        delay(2000);
-//        for(int j = 255; j >= 0 ; j--){
-//
-//            for(uint16_t i=0; i < strip.numPixels(); i++) {
-//                strip.setPixelColor(i, strip.Color(0,0,0, t_gamma[j] ) );
-//            }
-//            strip.show();
-//        }
-//    }
-//
-//    delay(500);
 
 
 }
@@ -314,6 +285,236 @@ void theaterChaseRainbow(uint8_t wait) {
     }
 }
 
+void kitt() {
+
+    Segment segments;
+
+    unsigned long start = millis();
+    bool done = false;
+
+    for (int y=0; y < strip.numPixels(); y++) {
+        strip.setPixelColor(y, strip.Color(0,0,0));
+    }
+
+    while (!done) {
+        
+        unsigned long now = millis();
+        unsigned long elapsed = now - start;
+        if (elapsed > 15000) done = true;
+        double progress = ((elapsed % 1700) / 1700.0);
+        
+        int lead = progress * (26 * 2); 
+        
+        for (int x=0; x <26; x++) {
+
+            uint32_t color = strip.Color(0, 0, 0);
+
+            int leadToX = progress < 0.5 ? lead : (26 - (lead % 26)); // lead mapped to x keyspace
+
+            int dist = abs(leadToX - x);
+
+            if ((dist <= 5) && ((progress < 0.5 && x <= leadToX) || (progress >= 0.5 && x > leadToX))) {
+                double distScale = 1.0 - (2 * dist / 10.0);
+                color = ColorScale(strip.Color(255, 0, 0), distScale);
+            }
+            
+            GetIdxForRow(x, segments);
+            strip.setPixelColor(segments.al, color);
+            strip.setPixelColor(segments.ar, color);
+            strip.setPixelColor(segments.cl, color);
+            strip.setPixelColor(segments.cr, color);
+        }
+        strip.show();
+
+        delay(30);
+    }
+    
+}
+
+void conveyorbelt() {
+
+    Segment segments;
+
+    unsigned long start = millis();
+    bool done = false;
+
+    while(!done) {
+        unsigned long now = millis();
+        unsigned long elapsed = now - start;
+        int tick = (elapsed / 250);
+        if (elapsed > 90000) done = true;
+        for (int x = 0; x < 27; x++) {
+
+            uint32_t color = Wheel((int)((x+tick)/54.0 * 255) % 255);
+            GetIdxForRow(x, segments);
+            if (x != 26) {
+                strip.setPixelColor(segments.al, color);
+                strip.setPixelColor(segments.ar, color);
+            }
+            strip.setPixelColor(segments.cr, color);
+            strip.setPixelColor(segments.cl, color);
+
+        }
+
+        strip.show();
+        delay(50);
+
+    }
+
+}
+
+void quilt() {
+
+    unsigned long start = millis();
+
+    // https://coolors.co/
+    uint32_t palette[4][6] = {
+            {
+                    strip.Color(130, 9, 51),
+                    strip.Color(216, 71, 151),
+                    strip.Color(210, 253, 255),
+                    strip.Color(210, 253, 255),
+                    strip.Color(58, 190, 255),
+                    strip.Color(38, 255, 230)
+            },
+            {
+                    strip.Color(1, 22, 56),
+                    strip.Color(46, 41, 78),
+                    strip.Color(144, 85, 162),
+                    strip.Color(144, 85, 162),
+                    strip.Color(212, 153, 185),
+                    strip.Color(232, 193, 197)
+            },
+            {
+                    strip.Color(255, 255, 255),
+                    strip.Color(239, 255, 250),
+                    strip.Color(229, 236, 244),
+                    strip.Color(195, 190, 247),
+                    strip.Color(138, 79, 255),
+                    strip.Color(138, 79, 255)
+            },
+            { // Belgian Flag
+                    strip.Color(0, 0, 0),
+                    strip.Color(0, 0, 0),
+                    strip.Color(255, 233, 54),
+                    strip.Color(255, 233, 54),
+                    strip.Color(255, 15, 33),
+                    strip.Color(255, 15, 33),
+            }
+    };
+
+    uint32_t * colors = palette[random(4)];
+
+    bool done = false;
+    while (!done) {
+        unsigned long now = millis();
+        unsigned long elapsed = now - start;
+        if ((elapsed/1000) % 9 == 0) colors = palette[random(4)];
+        if (elapsed > 90000) done = true;
+
+        for (int i = 0; i < 20; i++) {
+            strip.setPixelColor(random(strip.numPixels()), colors[random(6)]);
+        }
+
+        strip.show();
+        delay(60);
+    }
+
+}
+
+void pulseBeam() {
+
+    Segment segments;
+
+    unsigned long start = millis();
+    double progress;
+    bool done = false;
+    while(!done) {
+
+        // clear rods
+        for (int y=0; y < strip.numPixels(); y++) {
+            strip.setPixelColor(y, strip.Color(0,0,0));
+        }
+        //bool bothLocked = random(10) < 4; // 40% chance of both locked to same color
+        bool topLocked = random(10) < 6; // 60% chance of locked top part
+        bool topOffset = random(1000) * 13; // color offsets
+        int horizon = topLocked ? 15 : 13;
+        double speedup = random(3) + 1;
+        for (int x = 0; x < 100; x++) {
+    
+            double magnitude = sin(pow(speedup*x/5.0,2));
+            double amagnitude = abs(magnitude);
+            double magnitudeRight = sin(pow(2*x/5.0,2));
+            double amagnitudeRight = abs(magnitudeRight);
+
+            unsigned long now = millis();
+            unsigned long elapsed = now - start;
+            if (elapsed > 100000) done = true;
+            progress = (elapsed % 9000) / 9000.0;
+
+            double rows = amagnitude * horizon;
+            double rowsRight = amagnitudeRight * horizon;
+            double cutoffHead = horizon - rows;
+            double cutoffTail = horizon + rows;
+            double cutoffHeadRight = horizon - rowsRight;
+            double cutoffTailRight = horizon + rowsRight;
+
+            uint32_t color = strip.Color(0,0,0);
+
+            uint32_t baseColor = Wheel((int)(255 * progress * (1 + speedup/10.0)) % 255);//Wheel(255 * progress);
+
+            for (int y = 0; y < (topLocked ? 15 : 26); y++) {
+
+                uint32_t leftColor = color;
+                uint32_t rightColor = color;
+                if (rows != 0 && y > cutoffHead && y < cutoffTail) {
+                    double distScale = 1.0 - (abs(horizon-y)/rows);
+                    leftColor = ColorScale(baseColor, distScale);
+                }
+                if (rowsRight != 0 && y > cutoffHeadRight && y < cutoffTailRight) {
+                    double distScale = 1.0 - (abs(horizon-y)/rowsRight);
+                    rightColor = ColorScale(baseColor, distScale);
+                }
+
+                GetIdxForRow(y, segments);
+                if (y != 26) {
+                    strip.setPixelColor(segments.al, leftColor);
+                    strip.setPixelColor(segments.ar, leftColor);
+                }
+                strip.setPixelColor(segments.cl, rightColor);
+                strip.setPixelColor(segments.cr, rightColor);
+    
+            }
+
+            if (topLocked) {
+
+                for (int y = 15; y < 27; y++) {
+
+                    uint32_t leftCol = Wheel((int)(200.0 * (elapsed+topOffset)/10000) % 255);
+                    uint32_t rightCol = Wheel((int)(200.0 * (elapsed+topOffset)/6666) % 255);
+
+                    GetIdxForRow(y, segments);
+                    if (y != 26) {
+                        strip.setPixelColor(segments.al, leftCol);
+                        strip.setPixelColor(segments.ar, leftCol);
+                    }
+                    strip.setPixelColor(segments.cl, rightCol);
+                    strip.setPixelColor(segments.cr, rightCol);
+
+                }
+
+            }
+
+            strip.show();
+            delay(30+20*speedup);
+    
+        }
+        
+    }
+
+}
+
+
 
 void loop() {
 
@@ -334,31 +535,22 @@ void loop() {
 
 //    rainbowCycle(20);
 
-    rainbow(20);
+//    rainbow(20);
+
+    kitt();
+
+//    pulseBeam();
+
+//    quilt();
+
+//    conveyorbelt();
 
 }
-
-
-int x = 0;
-void loopLedsInSequence() {
-
-    for (int i = 0; i < strip.numPixels(); i++) {
-        strip.setPixelColor(i, strip.Color(255, 255, 255));
-    }
-
-    strip.setPixelColor(x, strip.Color(0,140,255));
-
-    strip.show();
-    delay(100);
-    x = x < strip.numPixels() - 1 ? x + 1 : x = 0;
-}
-
 
 int main() {
-
+    srandom(millis());
     while (!strip.done) {
         loop();
-//        loopLedsInSequence();
     }
     SDL_Quit();
     return 0;
