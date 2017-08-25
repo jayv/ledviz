@@ -76,6 +76,33 @@ void circleLineChase(uint32_t color_background, uint32_t color_line, uint32_t li
     }
 }
 
+void pingPong(uint32_t color_background, uint32_t color_line, uint32_t n_cycles, uint8_t wait) {
+    int current_circle_idx = 0;
+
+    for (int cycle = 0; cycle < n_cycles; cycle++) {
+
+        bool odd = cycle % 2;
+
+        int bounce_circle_idx = (odd ? 5 : 50) + random (10);
+
+        for (; current_circle_idx != bounce_circle_idx; odd ? current_circle_idx-- : current_circle_idx++) {
+            for(int pixel_idx = 0; pixel_idx < strip.numPixels(); pixel_idx++) {
+                uint8_t circle_idx = GetFullCircleIndex(pixel_idx);
+
+                if (current_circle_idx < circle_idx) {
+                    strip.setPixelColor(pixel_idx, color_line);
+                } else {
+                    strip.setPixelColor(pixel_idx, color_background);
+                }
+            }
+
+            strip.show();
+            delay(wait);
+        }
+    }
+
+}
+
 uint8_t red(uint32_t c) {
     return (c >> 8);
 }
@@ -528,6 +555,8 @@ void loop() {
 //    randomBlinkFade(strip.Color(25, 0, 0), strip.Color(0, 0, 25), 20, 20);
     //delay(500);
 //    randomBlinkFade(strip.Color(0, 0, 25), strip.Color(0, 25, 0), 2
+
+//    pingPong(strip.Color(250, 0, 100), strip.Color(100, 0, 250), 10, 10);
 
 //    whiteOverRainbow(0,75,1);
 
