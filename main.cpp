@@ -90,7 +90,15 @@ void pingPong(uint32_t color_background, uint32_t color_line, uint32_t n_cycles,
                 uint8_t circle_idx = GetFullCircleIndex(pixel_idx);
 
                 if (current_circle_idx < circle_idx) {
-                    strip.setPixelColor(pixel_idx, color_line);
+                    int pxl_diff = abs(current_circle_idx - circle_idx);
+                    int crossover_width = 8;
+
+                    if (pxl_diff < crossover_width) {
+                        strip.setPixelColor(
+                                pixel_idx, interpolate(color_background, color_line, pxl_diff * 255 / crossover_width));
+                    } else {
+                        strip.setPixelColor(pixel_idx, color_line);
+                    }
                 } else {
                     strip.setPixelColor(pixel_idx, color_background);
                 }
