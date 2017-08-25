@@ -111,6 +111,42 @@ void pingPong(uint32_t color_background, uint32_t color_line, uint32_t n_cycles,
 
 }
 
+void colorWave(uint32_t color_under, uint32_t color_above, uint32_t n_cycles, uint8_t wait) {
+    for (int cycle = 0; cycle < n_cycles; cycle++) {
+
+        double wave_center = GetMaxColHeight() / 3;
+        int crossover_width = 8;
+
+        double min_wave_height = 8;
+        double wave_height = min_wave_height + random(GetMaxColHeight() - min_wave_height + crossover_width / 2);
+
+        for (double theta = 0; theta < M_PI * wave_height; theta += .2) {
+            double wave = wave_center + wave_height / 2 * sin((2.0 / wave_height) * theta - 1/3) + wave_height / 6;
+
+            for(int pixel_idx = 0; pixel_idx < strip.numPixels(); pixel_idx++) {
+                byte row_idx, col_idx;
+                GetRowAndColIdx(pixel_idx, &row_idx, &col_idx);
+
+                if (row_idx < wave) {
+                    int pxl_diff = abs(row_idx - wave);
+
+                    if (pxl_diff < crossover_width) {
+                        strip.setPixelColor(
+                                pixel_idx, interpolate(color_above, color_under, pxl_diff * 255 / crossover_width));
+                    } else {
+                        strip.setPixelColor(pixel_idx, color_under);
+                    }
+                } else {
+                    strip.setPixelColor(pixel_idx, color_above);
+                }
+            }
+
+            strip.show();
+            delay(wait);
+        }
+    }
+}
+
 uint8_t red(uint32_t c) {
     return (c >> 8);
 }
