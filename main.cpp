@@ -285,25 +285,82 @@ void theaterChaseRainbow(uint8_t wait) {
     }
 }
 
-void rodsWipeUp() {
+void kitt() {
 
     Segment segments;
 
-    for (int x=0; x <=26; x++) {
+    unsigned long start = millis();
+    bool done = false;
 
-        for (int y=0; y < strip.numPixels(); y++) {
-            strip.setPixelColor(y, strip.Color(150,150,150));
+    for (int y=0; y < strip.numPixels(); y++) {
+        strip.setPixelColor(y, strip.Color(0,0,0));
+    }
+
+    while (!done) {
+        
+        unsigned long now = millis();
+        unsigned long elapsed = now - start;
+        if (elapsed > 15000) done = true;
+        double progress = ((elapsed % 1700) / 1700.0);
+        
+        int lead = progress * (26 * 2); 
+        
+        for (int x=0; x <26; x++) {
+
+            uint32_t color = strip.Color(0, 0, 0);
+
+            int leadToX = progress < 0.5 ? lead : (26 - (lead % 26)); // lead mapped to x keyspace
+
+            int dist = abs(leadToX - x);
+
+            if ((dist <= 5) && ((progress < 0.5 && x <= leadToX) || (progress >= 0.5 && x > leadToX))) {
+                double distScale = 1.0 - (2 * dist / 10.0);
+                color = ColorScale(strip.Color(255, 0, 0), distScale);
+            }
+            
+            GetIdxForRow(x, segments);
+            strip.setPixelColor(segments.al, color);
+            strip.setPixelColor(segments.ar, color);
+            strip.setPixelColor(segments.cl, color);
+            strip.setPixelColor(segments.cr, color);
         }
-
-        GetIdxForRow(x, segments);
-        strip.setPixelColor(segments.al, strip.Color(0,100,200));
-        strip.setPixelColor(segments.ar, strip.Color(0,100,200));
-        strip.setPixelColor(segments.cl, strip.Color(0,100,200));
-        strip.setPixelColor(segments.cr, strip.Color(0,100,200));
         strip.show();
 
-        delay(100);
+        delay(30);
     }
+    
+}
+
+void conveyorbelt() {
+
+    Segment segments;
+
+    unsigned long start = millis();
+    bool done = false;
+
+    while(!done) {
+        unsigned long now = millis();
+        unsigned long elapsed = now - start;
+        int tick = (elapsed / 250);
+        if (elapsed > 90000) done = true;
+        for (int x = 0; x < 27; x++) {
+
+            uint32_t color = Wheel((int)((x+tick)/54.0 * 255) % 255);
+            GetIdxForRow(x, segments);
+            if (x != 26) {
+                strip.setPixelColor(segments.al, color);
+                strip.setPixelColor(segments.ar, color);
+            }
+            strip.setPixelColor(segments.cr, color);
+            strip.setPixelColor(segments.cl, color);
+
+        }
+
+        strip.show();
+        delay(50);
+
+    }
+
 }
 
 void quilt() {
@@ -360,7 +417,7 @@ void quilt() {
         }
 
         strip.show();
-        strip.delay(60);
+        delay(60);
     }
 
 }
@@ -480,11 +537,14 @@ void loop() {
 
 //    rainbow(20);
 
-//    rodsWipeUp();
+    kitt();
 
 //    pulseBeam();
 
-    quilt();
+//    quilt();
+
+//    conveyorbelt();
+
 }
 
 int main() {
