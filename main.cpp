@@ -306,6 +306,65 @@ void rodsWipeUp() {
     }
 }
 
+void quilt() {
+
+    unsigned long start = millis();
+
+    // https://coolors.co/
+    uint32_t palette[4][6] = {
+            {
+                    strip.Color(130, 9, 51),
+                    strip.Color(216, 71, 151),
+                    strip.Color(210, 253, 255),
+                    strip.Color(210, 253, 255),
+                    strip.Color(58, 190, 255),
+                    strip.Color(38, 255, 230)
+            },
+            {
+                    strip.Color(1, 22, 56),
+                    strip.Color(46, 41, 78),
+                    strip.Color(144, 85, 162),
+                    strip.Color(144, 85, 162),
+                    strip.Color(212, 153, 185),
+                    strip.Color(232, 193, 197)
+            },
+            {
+                    strip.Color(255, 255, 255),
+                    strip.Color(239, 255, 250),
+                    strip.Color(229, 236, 244),
+                    strip.Color(195, 190, 247),
+                    strip.Color(138, 79, 255),
+                    strip.Color(138, 79, 255)
+            },
+            { // Belgian Flag
+                    strip.Color(0, 0, 0),
+                    strip.Color(0, 0, 0),
+                    strip.Color(255, 233, 54),
+                    strip.Color(255, 233, 54),
+                    strip.Color(255, 15, 33),
+                    strip.Color(255, 15, 33),
+            }
+    };
+
+    uint32_t * colors = palette[random(4)];
+
+    bool done = false;
+    while (!done) {
+        unsigned long now = millis();
+        unsigned long elapsed = now - start;
+        if ((elapsed/1000) % 9 == 0) colors = palette[random(4)];
+        if (elapsed > 90000) done = true;
+
+        for (int i = 0; i < 20; i++) {
+            strip.setPixelColor(random(strip.numPixels()), colors[random(6)]);
+        }
+
+        strip.show();
+        strip.delay(60);
+    }
+
+}
+
 void pulseBeam() {
 
     Segment segments;
@@ -423,7 +482,9 @@ void loop() {
 
 //    rodsWipeUp();
 
-    pulseBeam();
+//    pulseBeam();
+
+    quilt();
 }
 
 int main() {
