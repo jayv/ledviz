@@ -4,6 +4,9 @@
 #include <cstdint>
 typedef uint8_t byte;
 
+
+// ============================================================================================================
+
 struct Segment {
     uint8_t cr;
     uint8_t cl;
@@ -120,5 +123,8 @@ uint32_t interpolate(uint32_t color1, uint32_t color2, byte value) {
 
     return color_out;
 }
+
+
+// ==========================================================================================================
 
 #endif //BURNINGMAN_LEDASSIGNMENTS_H

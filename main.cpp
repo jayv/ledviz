@@ -24,7 +24,7 @@ inline double abs(double val) {
     return fabs(val);
 }
 
-// ////////////////////////////////////////////////////
+// ===========================================================================================================
 
 // Input a value 0 to 255 to get a color value.
 // The colours are a transition r - g - b - back to r.
@@ -359,7 +359,7 @@ void theaterChaseRainbow(uint8_t wait) {
 // acceleration until halfway, then deceleration
 // https://gist.github.com/gre/1650294
 float easeInOutQuad(float t) {
-    return t<.5 ? 2.0*t*t : -1+(4-2.0*t)*t;
+    return t<.5 ? 2.0*t*t : -1.0+(4.0-2.0*t)*t;
 }
 
 void kitt() {
@@ -378,7 +378,7 @@ void kitt() {
         unsigned long now = millis();
         unsigned long elapsed = now - start;
         if (elapsed > 15000) done = true;
-        double progress = ((elapsed % 2700) / 2700.0);
+        double progress = ((elapsed % 3800) / 3800.0);
         progress = easeInOutQuad(progress);
 
         int lead = progress * (26 * 2); 
@@ -388,11 +388,11 @@ void kitt() {
 
             uint32_t color = strip.Color(0, 0, 0);
 
-            int leadToX = progress < 0.5 ? lead : (26 - (lead % 26)); // lead mapped to x keyspace
+            int leadToX = progress < 0.5 ? lead : (25 - (lead % 26)); // lead mapped to x keyspace
 
             int dist = abs(leadToX - x);
 
-            if ((dist <= 7) && ((progress < 0.5 && x <= leadToX) || (progress >= 0.5 && x > leadToX))) {
+            if (dist <= 7) {
                 double distScale = 1.0 - ((2.0*dist) / (2.0*tail));
                 color = ColorScale(strip.Color(255, 0, 0), distScale);
             }
@@ -515,10 +515,10 @@ void pulseBeam() {
             strip.setPixelColor(y, strip.Color(0,0,0));
         }
         //bool bothLocked = random(10) < 4; // 40% chance of both locked to same color
-        bool topLocked = random(10) < 6; // 60% chance of locked top part
+        bool topLocked = random(10) < 3; // 60% chance of locked top part
         bool topOffset = random(1000) * 13; // color offsets
-        int horizon = topLocked ? 15 : 13;
-        double speedup = random(3) + 1;
+        int horizon = topLocked ? 15 : 10;
+        double speedup = 1; //random(3) + 1;
         for (int x = 0; x < 100; x++) {
     
             double magnitude = sin(pow(speedup*x/5.0,2));
@@ -529,9 +529,9 @@ void pulseBeam() {
             unsigned long now = millis();
             unsigned long elapsed = now - start;
             if (elapsed > 100000) done = true;
-            progress = (elapsed % 9000) / 9000.0;
+            progress = (elapsed % 13000) / 13000.0;
 
-            double rows = amagnitude * horizon;
+            double rows = amagnitude * 13;//horizon;
             double rowsRight = amagnitudeRight * horizon;
             double cutoffHead = horizon - rows;
             double cutoffTail = horizon + rows;
@@ -542,7 +542,7 @@ void pulseBeam() {
 
             uint32_t baseColor = Wheel((int)(255 * progress * (1 + speedup/10.0)) % 255);//Wheel(255 * progress);
 
-            for (int y = 0; y < (topLocked ? 15 : 26); y++) {
+            for (int y = 0; y < (topLocked ? horizon : 26); y++) {
 
                 uint32_t leftColor = color;
                 uint32_t rightColor = color;
@@ -585,7 +585,7 @@ void pulseBeam() {
             }
 
             strip.show();
-            delay(30+20*speedup);
+            delay(50+20*speedup);
     
         }
         
@@ -610,6 +610,8 @@ void loop() {
 
 //    pingPong(strip.Color(250, 0, 100), strip.Color(100, 0, 250), 10, 10);
 
+//    colorWave(strip.Color(250, 0, 100), strip.Color(100, 0, 250), 10, 10);
+
 //    whiteOverRainbow(0,75,1);
 
 //    rainbowFade2White(30,3,0);
@@ -618,15 +620,20 @@ void loop() {
 
 //    rainbow(20);
 
-    kitt();
+//    kitt();
 
-//    pulseBeam();
+    pulseBeam();
 
 //    quilt();
 
 //    conveyorbelt();
 
 }
+
+
+
+
+// =======================================================================================================
 
 int main() {
     srandom(millis());
