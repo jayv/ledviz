@@ -26,6 +26,7 @@ inline double abs(double val) {
 
 // ===========================================================================================================
 
+
 // Input a value 0 to 255 to get a color value.
 // The colours are a transition r - g - b - back to r.
 uint32_t Wheel(byte WheelPos) {
@@ -46,7 +47,7 @@ uint32_t Wheel(byte WheelPos) {
 void colorWipeUp(uint32_t color, uint8_t wait) {
     for (uint16_t i = 0; i < GetMaxColHeight(); i++) {
         for(uint16_t pixel_idx = 0; pixel_idx < strip.numPixels(); pixel_idx++) {
-             uint8_t row_idx, col_idx;
+            uint8_t row_idx, col_idx;
             GetRowAndColIdx(pixel_idx, &row_idx, &col_idx);
             if (row_idx == i) {
                 strip.setPixelColor(pixel_idx, color);
@@ -220,11 +221,14 @@ void whiteOverRainbow(uint8_t wait, uint8_t whiteSpeed, uint8_t whiteLength ) {
 
     static unsigned long lastTime = 0;
 
+    unsigned long start = millis();
+
     while(true){
+        if ((millis() - start) > 90000) break;
         for(int j=0; j<256; j++) {
             for(uint16_t i=0; i<strip.numPixels(); i++) {
                 if((i >= tail && i <= head) || (tail > head && i >= tail) || (tail > head && i <= head) ){
-                    strip.setPixelColor(i, strip.Color(0,0,0, 255 ) );
+                    strip.setPixelColor(i, strip.Color(255,255,255) );
                 }
                 else{
                     strip.setPixelColor(i, Wheel(((i * 256 / strip.numPixels()) + j) & 255));
@@ -255,7 +259,7 @@ void whiteOverRainbow(uint8_t wait, uint8_t whiteSpeed, uint8_t whiteLength ) {
 
 // fades from background color to blink color by blinking more and more rows until all
 // rods have the blinking color
-void randomBlinkFade(uint32_t color_background, uint32_t color_blink, uint8_t wait, uint8_t n_repeats) {
+void randomBlinkFade(uint32_t color_background, uint32_t color_blink, int wait, uint8_t n_repeats) {
     byte i_max = 100;
     // Generate a random number between 0 and i_max for each row.
     // Increase the threshold from 0 to i_max, and give all rows with a value below the threshold the blinking color
@@ -359,7 +363,7 @@ void theaterChaseRainbow(uint8_t wait) {
 // acceleration until halfway, then deceleration
 // https://gist.github.com/gre/1650294
 float easeInOutQuad(float t) {
-    return t<.5 ? 2.0*t*t : -1.0+(4.0-2.0*t)*t;
+    return t<.5 ? 2.0*t*t : -1+(4-2.0*t)*t;
 }
 
 void kitt() {
@@ -374,17 +378,17 @@ void kitt() {
     }
 
     while (!done) {
-        
+
         unsigned long now = millis();
         unsigned long elapsed = now - start;
         if (elapsed > 15000) done = true;
-        double progress = ((elapsed % 3800) / 3800.0);
-        progress = easeInOutQuad(progress);
+        double progress = ((elapsed % 3200) / 3200.0);
+//        progress = easeInOutQuad(progress);
 
-        int lead = progress * (26 * 2); 
+        int lead = progress * (26 * 2);
         const int tail = 7;
 
-        for (int x=0; x <26; x++) {
+        for (int x=0; x <27; x++) {
 
             uint32_t color = strip.Color(0, 0, 0);
 
@@ -407,7 +411,7 @@ void kitt() {
 
         delay(10);
     }
-    
+
 }
 
 void conveyorbelt() {
@@ -421,7 +425,7 @@ void conveyorbelt() {
         unsigned long now = millis();
         unsigned long elapsed = now - start;
         int tick = (elapsed / 250);
-        if (elapsed > 90000) done = true;
+        if (elapsed > 60000) done = true;
         for (int x = 0; x < 27; x++) {
 
             uint32_t color = Wheel((int)((x+tick)/54.0 * 255) % 255);
@@ -515,20 +519,20 @@ void pulseBeam() {
             strip.setPixelColor(y, strip.Color(0,0,0));
         }
         //bool bothLocked = random(10) < 4; // 40% chance of both locked to same color
-        bool topLocked = random(10) < 3; // 60% chance of locked top part
+        bool topLocked = random(10) < 6; // 60% chance of locked top part
         bool topOffset = random(1000) * 13; // color offsets
         int horizon = topLocked ? 15 : 10;
         double speedup = 1; //random(3) + 1;
         for (int x = 0; x < 100; x++) {
-    
-            double magnitude = sin(pow(speedup*x/5.0,2));
+
+            double magnitude = sin(pow(x/15.0,2));
             double amagnitude = abs(magnitude);
-            double magnitudeRight = sin(pow(2*x/5.0,2));
+            double magnitudeRight = sin(pow(x/10.0,2));
             double amagnitudeRight = abs(magnitudeRight);
 
             unsigned long now = millis();
             unsigned long elapsed = now - start;
-            if (elapsed > 100000) done = true;
+            if (elapsed > 39000) done = true;
             progress = (elapsed % 13000) / 13000.0;
 
             double rows = amagnitude * 13;//horizon;
@@ -562,7 +566,7 @@ void pulseBeam() {
                 }
                 strip.setPixelColor(segments.cl, rightColor);
                 strip.setPixelColor(segments.cr, rightColor);
-    
+
             }
 
             if (topLocked) {
@@ -586,51 +590,73 @@ void pulseBeam() {
 
             strip.show();
             delay(50+20*speedup);
-    
+
         }
-        
+
     }
 
 }
 
+void circleLineChaseGroup() {
+    for (int x=40; x > 0; x-=2) {
+        circleLineChase(strip.Color(0, 0, 0), strip.Color(0, 0, 255), 2, x);
+    }
+    circleLineChase(strip.Color(0, 0, 0), strip.Color(0, 0, 255), 2, 1);
+    circleLineChase(strip.Color(0, 0, 0), strip.Color(0, 0, 255), 2, 1);
+    circleLineChase(strip.Color(0, 0, 0), strip.Color(0, 0, 255), 2, 1);
+    for (int x=1; x < 40; x+=2) {
+        circleLineChase(strip.Color(0, 0, 0), strip.Color(0, 0, 255), 2, x);
+    }
+}
 
+void colorWipeUpGroup() {
+    for (int x=0; x < 255; x+=20) {
+        colorWipeUp(Wheel(x), 50);
+        colorWipeUp(strip.Color(0, 0, 0), 50);
+    }
+}
+
+void randomBlinkGroup() {
+    randomBlinkFade(strip.Color(100, 0, 0), strip.Color(0, 0, 100), 40, 10);
+    randomBlinkFade(strip.Color(0, 0, 255), strip.Color(0, 255, 0), 200, 2);
+    randomBlinkFade(strip.Color(0, 255, 0), strip.Color(0, 0, 255), 200, 2);
+}
 
 void loop() {
 
-    // Some example procedures showing how to display to the pixels:
-//    colorWipeUp(strip.Color(25, 0, 0), 50); // Red
-//    colorWipeUp(strip.Color(0, 25, 0), 50); // Green
-//    colorWipeUp(strip.Color(0, 0, 25), 50); // Blue
-//    circleLineChase(strip.Color(0, 0, 0), strip.Color(250, 0, 0), 2, 40);
-//    circleLineChase(strip.Color(0, 0, 0), strip.Color(0, 250, 0), 2, 40);
-//    circleLineChase(strip.Color(0, 0, 0), strip.Color(0, 0, 250), 2, 40);
-//    randomBlinkFade(strip.Color(25, 0, 0), strip.Color(0, 0, 25), 20, 20);
-    //delay(500);
-//    randomBlinkFade(strip.Color(0, 0, 25), strip.Color(0, 25, 0), 2
+    circleLineChaseGroup();
 
-//    pingPong(strip.Color(250, 0, 100), strip.Color(100, 0, 250), 10, 10);
+    whiteOverRainbow(0, 75, 1);
 
-//    colorWave(strip.Color(250, 0, 100), strip.Color(100, 0, 250), 10, 10);
+    colorWipeUpGroup();
 
-//    whiteOverRainbow(0,75,1);
+    circleLineChase(strip.Color(60, 40, 0), strip.Color(250, 0, 0), 2, 40);
 
-//    rainbowFade2White(30,3,0);
+    rainbowFade2White(30, 3, 5);
 
-//    rainbowCycle(20);
+    randomBlinkGroup();
 
-//    rainbow(20);
+    pingPong(strip.Color(250, 0, 0), strip.Color(0, 250, 0), 20, 20);
 
-//    kitt();
+    quilt();
+
+    colorWave(strip.Color(250, 0, 100), strip.Color(0, 0, 250), 20, 10);
+
+    kitt();
+
+    conveyorbelt();
 
     pulseBeam();
 
-//    quilt();
-
-//    conveyorbelt();
+// debug leds one by one
+//  for (int x = 0; x < strip.numPixels(); x++) {
+//    strip.clear();
+//    strip.setPixelColor(x, strip.Color(255,0,0));
+//    strip.show();
+//    delay(500);
+//  }
 
 }
-
-
 
 
 // =======================================================================================================
