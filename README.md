@@ -1,5 +1,7 @@
 Simulated led strip visualization with SDL2.
 
+![Photo BM2017](21246099_10155542270909034_1258714529_o.jpg)
+
 More or less portable to Arduino/NeoPixel.
 
 To compile on OSX
